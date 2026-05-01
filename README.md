@@ -54,24 +54,23 @@ tr:hover td{background:#263148}
 .st .l{font-size:.75rem;color:#64748b;margin-top:2px}
 
 /* INPUT */
-input{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:7px 12px;border-radius:7px;font-size:.84rem;width:100%;margin-bottom:10px}
+input{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:7px 12px;border-radius:7px;font-size:.84rem;width:260px;margin-bottom:11px}
 input:focus{outline:none;border-color:#3b82f6}
-
-/* BUTTON */
-.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
-.primary{background:#3b82f6;color:#fff}
-.danger{background:#ef4444;color:#fff}
 
 /* RATING */
 .rb{background:#334155;border-radius:3px;height:5px;display:inline-block;width:44px;vertical-align:middle;margin-right:4px;overflow:hidden}
 .rf{background:#fbbf24;height:100%}
+
 .empty{text-align:center;padding:28px;color:#475569}
+.btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
+.primary{background:#3b82f6;color:#fff}
+.danger{background:#ef4444;color:#fff}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 <div id="loginPage">
   <div class="card">
     <h2>🔐 Login</h2>
@@ -82,7 +81,7 @@ input:focus{outline:none;border-color:#3b82f6}
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app" style="display:none">
 
 <header>
@@ -186,31 +185,132 @@ document.getElementById(id).classList.add('active');
 btn.classList.add('active');
 }
 
+/* HELPERS */
+const pkgN=['Daily','Weekly','Monthly'];
+const payN=['Easypaisa','JazzCash','Cash','Wallet'];
+const stN=['pending','completed','cancelled'];
+
+function vtag(v,b){
+return v==='1'&&b==='1'?'<span class="tag b">Busy</span>':
+v==='1'?'<span class="tag v">Verified</span> <span class="tag fr">Free</span>':
+'<span class="tag p">Pending</span>';
+}
+
+function stag(s){
+const c=s==='completed'?'co':s==='cancelled'?'ca':'pe';
+return '<span class="tag '+c+'">'+s+'</span>';
+}
+
+function rb(r){
+const p=(parseFloat(r)||0)/5*100;
+return '<span class="rb"><span class="rf" style="width:'+p+'%"></span></span>'+r;
+}
+
 /* DATA */
-let WW=[{id:'1',name:'Fatima',cat:'Maid',city:'Islamabad',rate:'800',rating:'4.9',jobs:'87',verified:'1',busy:'0'}];
-let UU=[{id:'1',name:'Ahmed',phone:'03001234567',role:'employer',wallet:'5200'}];
-let BB=[{id:'1001',wname:'Fatima',sdate:'01-04-2025',pkg:'1',amt:'4200',status:'1'}];
+let WW=[
+{id:'1',name:'Fatima Khan',cat:'Maid',city:'Islamabad',rate:'800',rating:'4.9',jobs:'87',verified:'1',busy:'0'},
+{id:'2',name:'Muhammad Ali',cat:'Cook',city:'Islamabad',rate:'1200',rating:'4.8',jobs:'63',verified:'1',busy:'0'},
+{id:'3',name:'Zahid Butt',cat:'Electrician',city:'Islamabad',rate:'2000',rating:'4.7',jobs:'44',verified:'1',busy:'1'},
+{id:'4',name:'Rukhsana Naz',cat:'Clothes',city:'Islamabad',rate:'600',rating:'5.0',jobs:'29',verified:'1',busy:'0'},
+{id:'5',name:'Imran Haider',cat:'Security',city:'Islamabad',rate:'1500',rating:'4.6',jobs:'18',verified:'1',busy:'0'},
+{id:'6',name:'Asif Khan',cat:'Plumber',city:'Islamabad',rate:'1800',rating:'4.5',jobs:'32',verified:'1',busy:'0'}
+];
 
-/* FUNCTIONS */
+let UU=[
+{id:'1',name:'Ahmed Raza',phone:'03001234567',role:'employer',wallet:'5200',date:'25-04-2025'},
+{id:'2',name:'Admin',phone:'admin',role:'admin',wallet:'0',date:'25-04-2025'},
+{id:'3',name:'Sara Khan',phone:'03009876543',role:'employer',wallet:'3000',date:'20-04-2025'}
+];
+
+let BB=[
+{id:'1001',wname:'Fatima Khan',sdate:'01-04-2025',edate:'07-04-2025',pkg:'1',amt:'4200',status:'1',pay:'3'},
+{id:'1002',wname:'Muhammad Ali',sdate:'05-04-2025',edate:'05-04-2025',pkg:'0',amt:'1200',status:'2',pay:'0'},
+{id:'1003',wname:'Rukhsana Naz',sdate:'10-04-2025',edate:'09-05-2025',pkg:'2',amt:'7656',status:'1',pay:'1'},
+{id:'1004',wname:'Imran Haider',sdate:'15-04-2025',edate:'21-04-2025',pkg:'1',amt:'5250',status:'0',pay:'3'}
+];
+
+/* DASH */
 function dash(){
-document.getElementById('st').innerHTML=`<div class="st"><div class="n">${WW.length}</div><div class="l">Workers</div></div>`;
+const ver=WW.filter(w=>w.verified==='1').length;
+const rev=BB.filter(b=>stN[parseInt(b.status)]==='completed')
+.reduce((a,b)=>a+parseFloat(b.amt||0),0)*.1;
+
+document.getElementById('st').innerHTML=
+`<div class="st"><div class="n">${WW.length}</div><div class="l">Workers</div></div>
+<div class="st"><div class="n">${ver}</div><div class="l">Verified</div></div>
+<div class="st"><div class="n">${BB.length}</div><div class="l">Bookings</div></div>
+<div class="st"><div class="n">${UU.length}</div><div class="l">Users</div></div>
+<div class="st"><div class="n">Rs ${Math.round(rev)}</div><div class="l">Revenue</div></div>`;
+
+const top=[...WW].sort((a,b)=>b.rating-a.rating).slice(0,5);
+document.getElementById('tW').innerHTML=top.map(w=>`
+<tr>
+<td>${w.name}</td>
+<td>${w.cat}</td>
+<td>${w.city}</td>
+<td>Rs ${w.rate}</td>
+<td>${rb(w.rating)}</td>
+<td>${vtag(w.verified,w.busy)}</td>
+</tr>`).join('');
+
+document.getElementById('rB').innerHTML=BB.slice(-4).reverse().map(b=>`
+<tr>
+<td>#${b.id}</td>
+<td>${b.wname}</td>
+<td>${pkgN[b.pkg]}</td>
+<td>Rs ${b.amt}</td>
+<td>${stag(stN[b.status])}</td>
+<td>${b.sdate}</td>
+</tr>`).join('');
 }
 
+/* WORKERS */
 function rW(){
-document.getElementById('wT').innerHTML=WW.map(w=>`<tr><td>${w.id}</td><td>${w.name}</td></tr>`).join('');
+const q=(document.getElementById('ws').value||'').toLowerCase();
+const list=WW.filter(w=>w.name.toLowerCase().includes(q)||w.cat.toLowerCase().includes(q));
+
+document.getElementById('wT').innerHTML=list.map(w=>`
+<tr>
+<td>${w.id}</td>
+<td>${w.name}</td>
+<td>${w.cat}</td>
+<td>${w.city}</td>
+<td>Rs ${w.rate}</td>
+<td>${rb(w.rating)}</td>
+<td>${w.jobs}</td>
+<td>${vtag(w.verified,w.busy)}</td>
+</tr>`).join('')||'<tr><td colspan="8" class="empty">No workers found</td></tr>';
 }
 
+/* BOOKINGS */
 function rB(){
-document.getElementById('bT').innerHTML=BB.map(b=>`<tr><td>${b.id}</td></tr>`).join('');
+document.getElementById('bT').innerHTML=BB.map(b=>`
+<tr>
+<td>#${b.id}</td>
+<td>${b.wname}</td>
+<td>${pkgN[b.pkg]}</td>
+<td>Rs ${b.amt}</td>
+<td>${stag(stN[b.status])}</td>
+<td>${payN[b.pay]}</td>
+<td>${b.sdate}</td>
+<td>${b.edate}</td>
+</tr>`).join('');
 }
 
+/* USERS */
 function rU(){
-document.getElementById('uT').innerHTML=UU.map(u=>`<tr><td>${u.id}</td></tr>`).join('');
+document.getElementById('uT').innerHTML=UU.map(u=>`
+<tr>
+<td>${u.id}</td>
+<td>${u.name}</td>
+<td>${u.phone}</td>
+<td><span class="tag ${u.role==='admin'?'ad':'fr'}">${u.role}</span></td>
+<td>Rs ${u.wallet}</td>
+<td>${u.date}</td>
+</tr>`).join('');
 }
 
-function load(){
-dash();rW();rB();rU();
-}
+function load(){dash();rW();rB();rU();}
 
 </script>
 
